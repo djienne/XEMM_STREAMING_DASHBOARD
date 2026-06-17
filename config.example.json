@@ -1,0 +1,45 @@
+{
+  "_comment": "EXAMPLE config for the XEMM live dashboard. Copy to config.json and fill in your own VPS / trading-repo details. config.json is gitignored, so your real host/IP/paths never get committed.",
+
+  "bind_host": "127.0.0.1",
+  "bind_port": 8787,
+
+  "vps": {
+    "_comment": "SSH target for the host running the native xemm_eval binary (read-only probes).",
+    "ssh_target": "user@YOUR_VPS_HOST",
+    "ssh_key": "~/.ssh/your-vps-key.pem",
+    "deploy_dir": "/home/user/your-trading-repo",
+    "process_name": "xemm_eval",
+    "container_name": "xemm-hype-soak",
+    "connect_timeout_s": 12
+  },
+
+  "_root_comment": "Path to the trading repo (holds scripts/trade_stats.py + aster.env + hyperliquid.env). Default '..' = the parent of this dashboard folder.",
+  "trading_root": "..",
+
+  "chart": {
+    "_comment": "The market shown on the main price chart. coin = HL coin, symbol = Aster symbol.",
+    "coin": "HYPE",
+    "symbol": "HYPEUSDT",
+    "history_minutes": 240,
+    "_tick_db_comment": "SQLite archive of every 1s mid (table ticks: ts INTEGER PRIMARY KEY, aster REAL, hl REAL). Exchanges only serve 1-minute candles historically, so this is the durable record for rebuilding a high-resolution chart later — queryable by time range.",
+    "tick_db": "data/prices.sqlite",
+    "_resolution_comment": "Chart resolution per zoom window: full 1s when short, coarser when wide. First bucket whose max_minutes >= the requested window wins (widest applies beyond the last).",
+    "resolution_buckets": [
+      { "max_minutes": 15, "bucket_s": 1 },
+      { "max_minutes": 60, "bucket_s": 10 },
+      { "max_minutes": 240, "bucket_s": 30 }
+    ]
+  },
+
+  "refresh": {
+    "_comment": "Background refresh cadences (seconds). The browser polls /api/state every `ui_poll_s`.",
+    "ui_poll_s": 5,
+    "live_s": 5,
+    "price_s": 1,
+    "health_s": 12,
+    "stats_s": 45,
+    "since_s": 300,
+    "latency_s": 1200
+  }
+}

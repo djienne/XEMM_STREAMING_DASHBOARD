@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XEMM · live desk</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ambient backdrop -->
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
+
+<!-- toast stack -->
+<div id="toasts" class="toasts" aria-live="polite"></div>
+
+<!-- breaker banner (fixed overlay so it never shifts the fixed layout) -->
+<div id="banner" class="banner" hidden></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="mark">XE<span>MM</span></div>
+    <div class="brand-sub">
+      <img class="venue-logo logo-aster" src="/static/aster_logo.svg" alt="Aster">
+      <span class="arrow">maker&nbsp;⇄&nbsp;hedge</span>
+      <img class="venue-logo logo-hl" src="/static/hl_logo.svg" alt="Hyperliquid">
+    </div>
+  </div>
+
+  <div class="topbar-status">
+    <div id="botPill" class="pill pill-unknown"><span class="dot"></span><span id="botPillText">connecting…</span></div>
+    <div id="breakerChip" class="bk-chip" title="circuit breaker — cross-venue equity drawdown vs trip limit">
+      <span class="bk-ico">⛨</span><span id="bkChipText">breaker —</span>
+    </div>
+    <div id="apiLatChip" class="api-lat" title="AWS Tokyo VPS → exchange API latency (best-of-3 TTFB), refreshed ~every 20 min">
+      <span class="al-lbl">AWS Tokyo VPS→API</span>
+      <span class="al-aster">Aster <b id="alAster">—</b></span>
+      <span class="al-hl">HL <b id="alHl">—</b></span>
+    </div>
+    <div class="since-chip" title="cutoff — same as remote scripts/pnl.py">
+      <span class="k">since</span><span id="sinceVal" class="v">—</span><span id="sinceSrc" class="src"></span><span id="sinceElapsed" class="since-elapsed"></span>
+    </div>
+    <div class="topbar-clock">
+      <button id="refreshBtn" class="ghost-btn" title="force a stats refresh now">↻</button>
+      <div class="updated"><span id="updatedDot" class="live-dot"></span><span id="updatedText">—</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="stage">
+
+  <!-- LEFT: hero KPIs · chart · compact panel grid -->
+  <div class="main">
+
+    <section class="hero">
+      <div class="kpi kpi-pnl">
+        <div class="kpi-label">net P&amp;L</div>
+        <div id="pnlVal" class="kpi-val num">—</div>
+        <div id="pnlBasis" class="kpi-foot">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">win rate</div>
+        <div id="wrVal" class="kpi-val num">—</div>
+        <div class="kpi-foot"><div class="wr-bar"><span id="wrFill"></span></div><span id="wrCount" class="muted"></span></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">delta</div>
+        <div id="deltaVal" class="kpi-val num">—</div>
+        <div id="deltaFoot" class="kpi-foot">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">equity</div>
+        <div id="eqVal" class="kpi-val num">—</div>
+        <div id="eqFoot" class="kpi-foot">—</div>
+      </div>
+      <div class="kpi kpi-sm">
+        <div class="kpi-label">hedge latency p50</div>
+        <div id="latVal" class="kpi-val num">—</div>
+        <div id="latFoot" class="kpi-foot">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">return</div>
+        <div id="retVal" class="kpi-val num">—</div>
+        <div id="retFoot" class="kpi-foot">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">proj P&amp;L / yr</div>
+        <div id="cagrVal" class="kpi-val num">—</div>
+        <div id="cagrFoot" class="kpi-foot">—</div>
+      </div>
+    </section>
+
+    <!-- ★ MAIN FEATURE: live dual-venue price chart with every trade marked -->
+    <section class="card chart-card" id="cardChart">
+      <div class="card-head chart-head">
+        <h2><span class="ch-coin">HYPE</span> price · <img class="ttl-logo" src="/static/aster_logo.svg" alt="Aster"> <span class="muted">vs</span> <img class="ttl-logo logo-hl" src="/static/hl_logo.svg" alt="Hyperliquid"> <span class="muted small" id="chartSub">— live, every fill marked</span></h2>
+        <div class="chart-controls">
+          <div class="chart-legend">
+            <span class="lg lg-aster"><i></i><img class="lg-logo" src="/static/aster_mark.svg" alt="">Aster <b id="lgAster">—</b></span>
+            <span class="lg lg-hl"><i></i><img class="lg-logo" src="/static/hl_mark.svg" alt="">Hyperliquid <b id="lgHl">—</b></span>
+            <span class="lg lg-basis"><i></i>basis <b id="lgBasis">—</b></span>
+            <span class="lg lg-buy"><i>▲</i>buy</span>
+            <span class="lg lg-sell"><i>▼</i>sell</span>
+          </div>
+          <div class="zoom" id="zoom">
+            <button data-w="5" class="zoom-btn">5m</button>
+            <button data-w="15" class="zoom-btn on">15m</button>
+            <button data-w="60" class="zoom-btn">1h</button>
+            <button data-w="240" class="zoom-btn">4h</button>
+            <button id="autoBtn" class="zoom-btn auto-on" title="auto-cycle 15m·1h·4h every ~2 min (5m on a fresh fill)">⟳</button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body chart-body">
+        <canvas id="priceChart"></canvas>
+        <div id="chartTip" class="chart-tip" hidden></div>
+        <div id="chartEmpty" class="chart-empty">collecting live price data…</div>
+      </div>
+    </section>
+
+    <!-- compact panel grid -->
+    <div class="panels">
+
+      <section class="card" id="cardHealth">
+        <div class="card-head"><h2>VPS &amp; Rust bot health <img class="rust-logo" src="/static/rust-logo.svg" alt="Rust" title="the live bot is a native Rust binary (xemm_eval)"><img class="aws-logo" src="/static/aws-logo.svg" alt="AWS" title="hosted on AWS (Tokyo)"></h2><span id="healthTag" class="tag">—</span></div>
+        <div class="card-body">
+          <div class="proc">
+            <div id="procState" class="proc-state">—</div>
+            <div class="proc-meta">
+              <span>pid <b id="procPid">—</b></span><span>up <b id="procUptime">—</b></span><span>hb <b id="hbAge">—</b></span><span class="rust-badge" title="native Rust binary"><img class="rust-logo" src="/static/rust-logo.svg" alt="">Rust</span>
+            </div>
+          </div>
+          <div class="meter-row">
+            <div class="meter"><label>bot CPU</label><div class="bar"><span id="cpuBar"></span></div><b id="cpuVal" class="num">—</b></div>
+            <div class="meter"><label>bot RSS</label><div class="bar"><span id="rssBar"></span></div><b id="rssVal" class="num">—</b></div>
+            <div class="meter"><label>load 1m</label><div class="bar"><span id="loadBar"></span></div><b id="loadVal" class="num">—</b></div>
+          </div>
+          <div class="cmd-line"><span class="k">launch</span><code id="procCmd">—</code></div>
+          <div class="host-line muted" id="hostLine">—</div>
+        </div>
+      </section>
+
+      <section class="card" id="cardPos">
+        <div class="card-head"><h2>positions &amp; net delta</h2><span id="posTag" class="tag">—</span></div>
+        <div class="card-body">
+          <table class="tbl" id="posTable">
+            <thead><tr><th>coin</th><th class="r">mid</th><th class="r"><img class="th-logo" src="/static/aster_logo.svg" alt="Aster"></th><th class="r"><img class="th-logo logo-hl" src="/static/hl_logo.svg" alt="Hyperliquid"></th><th class="r">net</th><th class="r">net $</th><th class="r">uPnL</th></tr></thead>
+            <tbody id="posBody"><tr><td colspan="7" class="empty">loading…</td></tr></tbody>
+          </table>
+          <div id="quoteNotice" class="quote-notice" hidden></div>
+        </div>
+      </section>
+
+      <section class="card" id="cardHedge">
+        <div class="card-head"><h2>hedge execution</h2><span id="hedgeTag" class="tag">—</span></div>
+        <div class="card-body">
+          <div class="hedge-headline"><b id="hedgePrimary" class="num">—</b><span class="muted">via fast primary path</span></div>
+          <div class="hedge-breakdown" id="hedgeBreakdown"></div>
+          <div class="lat-block">
+            <div class="lat-label"><span class="muted">fill→hedge latency</span> <span id="latCaption"></span></div>
+            <div class="lat-scale" id="latScale"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="cardEcon">
+        <div class="card-head"><h2>economics</h2><span id="econTag" class="tag">—</span></div>
+        <div class="card-body econ-body">
+          <div class="econ-grid">
+            <div><span class="k">round net Σ</span><b id="ecSum" class="num">—</b></div>
+            <div><span class="k">avg / round</span><b id="ecAvg" class="num">—</b></div>
+            <div><span class="k">best</span><b id="ecBest" class="num">—</b></div>
+            <div><span class="k">worst</span><b id="ecWorst" class="num">—</b></div>
+            <div><span class="k">entry basis</span><b id="ecBasis" class="num">—</b></div>
+            <div><span class="k">volume</span><b id="ecVol" class="num">—</b></div>
+            <div><span class="k">active span</span><b id="ecSpan" class="num">—</b></div>
+            <div><span class="k">fees paid</span><b id="ecFees" class="num">—</b></div>
+          </div>
+          <div id="ecWinLoss" class="econ-wl"></div>
+        </div>
+      </section>
+
+      <section class="card p-wide" id="cardSpread">
+        <div class="card-head">
+          <h2>quote spread decomposition <span class="muted small">— how the maker quote is built off the HL hedge</span></h2>
+          <span id="spreadTag" class="tag tag-cfg">—</span>
+        </div>
+        <div class="card-body">
+          <div id="spreadViz2" class="sd-wrap"><div class="empty">waiting for live prices…</div></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: full-height trade history rail -->
+  <aside class="rail">
+    <section class="card rail-card" id="cardFeed">
+      <div class="card-head">
+        <h2>trade history <span class="muted small">— Aster + HL</span></h2>
+        <span id="feedTag" class="tag">—</span>
+      </div>
+      <div id="todayBar" class="today-bar">
+        <div class="td-head">today <span class="muted">· since 00:00 UTC</span></div>
+        <div class="td-grid">
+          <div class="td-cell"><span class="td-k">trades</span><b id="tdTrades" class="td-v">—</b></div>
+          <div class="td-cell"><span class="td-k">win rate</span><b id="tdWr" class="td-v">—</b></div>
+          <div class="td-cell"><span class="td-k">net P&amp;L</span><b id="tdPnl" class="td-v">—</b></div>
+          <div class="td-cell" title="today's net P&amp;L as % of capital"><span class="td-k">P&amp;L %</span><b id="tdPnlPct" class="td-v">—</b></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="feedList" class="feed"><div class="empty">loading…</div></div>
+      </div>
+      <div class="rail-foot muted small" id="footAccounts">—</div>
+    </section>
+  </aside>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

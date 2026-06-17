@@ -1,0 +1,21 @@
+# runtime / build
+__pycache__/
+*.pyc
+*.log
+# the 1s price + trade-history archive (SQLite, grows ~2.5 MB/day) — not source
+data/
+
+# never commit secrets (the dashboard reads creds from the sibling trading repo, not here)
+*.env
+*.pem
+*.key
+secrets*
+
+# your real config (host/IP/SSH key path) — copy config.example.json -> config.json and fill in
+config.json
+
+# stray/large unrelated assets + internal tooling notes (not part of the public dashboard)
+vignette/
+codex-help.md
+codex-review.md
+codex-trace.txt

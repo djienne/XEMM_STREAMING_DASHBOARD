@@ -1,0 +1,21 @@
+# Keep the build context tiny and never bake runtime/secret/large files into the image —
+# data/, secrets and the trading repo are MOUNTED at runtime instead.
+data/
+secrets/
+secrets*
+*.pem
+*.key
+*.env
+.env
+__pycache__/
+*.pyc
+*.log
+.git/
+.gitignore
+vignette/
+codex-help.md
+codex-review.md
+codex-trace.txt
+README.md
+run.sh
+run.ps1

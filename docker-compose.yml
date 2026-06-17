@@ -1,0 +1,53 @@
+# XEMM live dashboard — run with:  docker compose up -d --build
+# Brings up the same dashboard at http://127.0.0.1:8787 as the native `python server.py` did.
+services:
+  dashboard:
+    build: .
+    image: xemm-dashboard:latest
+    container_name: xemm-dashboard
+    restart: unless-stopped
+
+    # Attach to Docker's built-in default bridge instead of letting compose carve out a NEW
+    # per-project network (which would allocate a fresh subnet from the address pool each time).
+    # No new IP space is consumed; outbound (APIs/WS/SSH) is NATed through the host and the
+    # published loopback port below still works exactly the same.
+    network_mode: bridge
+
+    # Publish to the HOST loopback only — same exposure as the native 127.0.0.1 bind. Inside the
+    # container the server must listen on 0.0.0.0 (Docker forwards the published port to it), so we
+    # flip the bind via env and explicitly allow it; the LAN can never reach it.
+    ports:
+      - "127.0.0.1:8787:8787"
+
+    environment:
+      XEMM_BIND_HOST: "0.0.0.0"
+      XEMM_ALLOW_REMOTE_BIND: "1"
+      XEMM_TRADING_ROOT: "/trading"            # where the trading repo is mounted (read-only) below
+      XEMM_SSH_HOST: "${XEMM_SSH_HOST:-}"      # optional: set in your .env to pre-seed known_hosts; blank = accept-new
+
+    volumes:
+      # Durable 1s-tick + trade-history archive. Bind-mounted from the host so it SURVIVES image
+      # rebuilds and `down`/`up` — not a single tick is lost and nothing here is ever recreated.
+      - ./data:/app/data
+
+      # UI assets mounted read-only so dashboard tweaks (css/js/html, gifs) show on a browser
+      # refresh with NO image rebuild. The image also bakes a copy, so it still runs standalone.
+      - ./static:/app/static:ro
+      - ./gifs:/app/gifs:ro
+
+      # The trading repo (scripts/trade_stats.py + pnl.py, aster.env, hyperliquid.env,
+      # config-live-hype.toml). READ-ONLY: the container can read creds + reuse the exact signing
+      # code, but can never write to or destroy anything in the live trading repo.
+      - ..:/trading:ro
+
+      # The VPS SSH key for the read-only health/latency probes. Override the host path in a local
+      # .env (XEMM_SSH_KEY=...); default expects a copy at ./secrets/lighter.pem. Mounted read-only;
+      # the entrypoint copies it to a private 0600 path inside the container (ssh refuses 0644).
+      - ${XEMM_SSH_KEY:-./secrets/lighter.pem}:/keys/lighter.pem:ro
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/api/state', timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 20s

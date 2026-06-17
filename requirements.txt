@@ -1,0 +1,7 @@
+# Pinned to the host's installed versions so the containerized trade_stats.py produces
+# byte-identical EIP-712 signatures and the same exchange data as a native run.
+websocket-client==1.9.0
+requests==2.32.5
+eth-account==0.13.7
+eth-abi==5.2.0
+eth-utils==5.3.1
