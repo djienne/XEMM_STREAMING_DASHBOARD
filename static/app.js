@@ -211,9 +211,11 @@ function renderHero(st, live, health, stats, derived) {
     else { dEl.textContent = "⚠ " + f.usd(live.worst_net_usd ?? 0); cls(dEl, "kpi-val", "num", "neg"); $("deltaFoot").textContent = "NOT delta-neutral"; }
   } else { dEl.textContent = "—"; $("deltaFoot").textContent = "—"; }
 
-  // equity — use the SAME trade_stats capital that pnl.py prints. On a delta-neutral book the
-  // marked equity wobbles with the cross-venue basis and the vs-baseline delta is misleading, so
-  // (exactly like pnl.py) we show the equity but defer to the per-round P&L and hide vs-baseline.
+  // equity — full live cross-venue capital: HL accountValue + Aster USDC/USDF/USDT. collectors
+  // includes the Aster USDT balance (trade_stats/pnl.py drop it): Aster pays closed profits in
+  // USDT, so excluding it would HIDE realized gains as USDC slowly converts to USDT. On a
+  // delta-neutral book the marked equity wobbles with the cross-venue basis and the vs-baseline
+  // delta is misleading, so we show equity but defer to the per-round P&L and hide vs-baseline.
   const eq = (stats.return && stats.return.capital) ?? (live.equity && live.equity.total);
   setVal("eqVal", eq == null ? "—" : f.usd(eq), eq);
   const base = health.breaker && health.breaker.baseline && health.breaker.baseline.equity_usd;
