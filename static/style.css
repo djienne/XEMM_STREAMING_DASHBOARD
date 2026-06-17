@@ -330,7 +330,7 @@ body{
 .gif-trigger{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .gif-trigger .gt-card{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 18px 16px;
   border-radius:22px;background:rgba(8,10,15,.74);backdrop-filter:blur(4px);border:1px solid var(--line-2)}
-.gif-trigger .gt-gif{height:min(46vh,440px);width:auto;max-width:48vw;border-radius:16px;object-fit:contain;background:#000;display:block}
+.gif-trigger .gt-gif{height:min(27.6vh,264px);width:auto;max-width:28.8vw;border-radius:16px;object-fit:contain;background:#000;display:block}
 .gif-trigger.win  .gt-card{border-color:rgba(52,224,161,.6);box-shadow:0 0 120px -8px rgba(52,224,161,.55),0 30px 80px -24px rgba(0,0,0,.85)}
 .gif-trigger.loss .gt-card{border-color:rgba(255,93,115,.6);box-shadow:0 0 120px -8px rgba(255,93,115,.55),0 30px 80px -24px rgba(0,0,0,.85)}
 .gif-trigger.win  .gt-gif{box-shadow:0 0 0 3px rgba(52,224,161,.5),0 0 70px -4px rgba(52,224,161,.6)}
