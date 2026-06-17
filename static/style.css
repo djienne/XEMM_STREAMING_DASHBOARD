@@ -43,8 +43,8 @@ body{
 }
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .muted{color:var(--muted)}
-.small{font-size:12px}
-.k{color:var(--txt-2);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.small{font-size:13px}
+.k{color:var(--txt-2);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .r{text-align:right}
 
 /* ---- ambient backdrop ---- */
@@ -74,7 +74,7 @@ body{
 }
 /* discreet circuit-breaker chip (the breaker is a safety stop, not a headline metric) */
 .bk-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;
-  background:var(--panel);border:1px solid var(--line);font-size:12px;color:var(--txt-2)}
+  background:var(--panel);border:1px solid var(--line);font-size:13px;color:var(--txt-2)}
 .bk-chip .bk-ico{font-size:13px;opacity:.8}
 .bk-chip b{font-family:var(--mono);color:var(--txt)}
 .bk-chip.armed{border-color:rgba(52,224,161,.25)}
@@ -84,7 +84,7 @@ body{
 /* VPS -> exchange API latency chip */
 .api-lat{display:inline-flex;align-items:center;gap:10px;padding:5px 11px;border-radius:9px;
   background:var(--panel);border:1px solid var(--line);font-size:12px;color:var(--txt-2)}
-.api-lat .al-lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.api-lat .al-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .api-lat .al-aster b{color:var(--amber);font-family:var(--mono);margin-left:3px}
 .api-lat .al-hl b{color:var(--cyan);font-family:var(--mono);margin-left:3px}
 .brand{display:flex;align-items:center;gap:16px}
@@ -115,15 +115,15 @@ body{
 .since-chip{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:10px;
   background:var(--panel);border:1px solid var(--line)}
 .since-chip .v{font-family:var(--mono);font-weight:600;color:var(--txt)}
-.since-chip .src{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.since-elapsed{font-family:var(--mono);font-size:12px;color:var(--cyan);font-weight:600}
+.since-chip .src{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.since-elapsed{font-family:var(--mono);font-size:13px;color:var(--cyan);font-weight:600}
 
 .topbar-clock{display:flex;align-items:center;gap:10px}
 .ghost-btn{background:var(--panel);border:1px solid var(--line);color:var(--txt-2);
   width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:15px;transition:.15s}
 .ghost-btn:hover{color:var(--txt);border-color:var(--line-2);background:var(--panel-2)}
 .ghost-btn.on{color:var(--cyan);border-color:rgba(79,214,230,.4)}
-.updated{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--txt-2)}
+.updated{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--txt-2)}
 .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);transition:.2s}
 .live-dot.stale{background:var(--amber)}
 .live-dot.dead{background:var(--red)}
@@ -147,9 +147,9 @@ body{
   border:1px solid var(--line);overflow:hidden}
 .kpi::after{content:"";position:absolute;left:0;top:0;right:0;height:1px;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
-.kpi-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--txt-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--txt-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi-val{font-size:23px;font-weight:700;margin:3px 0 2px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi-foot{font-size:10.5px;color:var(--txt-2);min-height:14px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.kpi-foot{font-size:11.5px;color:var(--txt-2);min-height:14px;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
 .kpi-sm .kpi-val{font-size:17px;color:var(--txt-2)}   /* latency is secondary — render it smaller */
 .pos{color:var(--green)}.neg{color:var(--red)}.flat{color:var(--txt)}
 .wr-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,93,115,.35);overflow:hidden;min-width:60px}
@@ -186,12 +186,12 @@ body{
 .rail-foot{flex:none;padding:7px 12px;border-top:1px solid var(--line);color:var(--muted)}
 /* "today" (UTC) summary strip atop the trade-history rail */
 .today-bar{flex:none;padding:9px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.018)}
-.td-head{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-2);margin-bottom:7px}
+.td-head{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-2);margin-bottom:7px}
 .td-head .muted{color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none}
 .td-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
 .td-cell{display:flex;align-items:baseline;justify-content:space-between;gap:8px;min-width:0}
-.td-k{font-size:10px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
-.td-v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt);white-space:nowrap}
+.td-k{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);white-space:nowrap}
+.td-v{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--txt);white-space:nowrap}
 .td-v.pos{color:var(--green)}
 .td-v.neg{color:var(--red)}
 .td-v.flat{color:var(--txt)}
@@ -209,7 +209,7 @@ body{
 .proc-meta b{color:var(--txt);font-family:var(--mono)}
 .meter-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
 .meter{display:grid;grid-template-columns:1fr auto;column-gap:10px;row-gap:6px;align-items:baseline}
-.meter label{grid-row:1;grid-column:1;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-2)}
+.meter label{grid-row:1;grid-column:1;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt-2)}
 .meter b{grid-row:1;grid-column:2;text-align:right}
 .meter .bar{grid-row:2;grid-column:1/3;height:6px;border-radius:3px;background:var(--bg-2);overflow:hidden;border:1px solid var(--line)}
 .meter .bar span{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .4s}
@@ -293,13 +293,13 @@ body{
 .feed-row.win{border-left-color:var(--green)}
 .feed-row.loss{border-left-color:var(--red)}
 .fr-top{display:flex;align-items:center;gap:8px}
-.fr-res{font-weight:800;font-size:11px;width:36px;flex:none}
+.fr-res{font-weight:800;font-size:12px;width:36px;flex:none}
 .feed-row.win .fr-res{color:var(--green)}
 .feed-row.loss .fr-res{color:var(--red)}
-.fr-pair{font-family:var(--sans);font-weight:700;font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fr-pnl{font-family:var(--mono);font-weight:800;font-size:13px;flex:none}
-.fr-net{font-family:var(--sans);font-size:9px;font-weight:600;color:var(--muted)}
-.fr-bot{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.fr-pair{font-family:var(--sans);font-weight:700;font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-pnl{font-family:var(--mono);font-weight:800;font-size:14px;flex:none}
+.fr-net{font-family:var(--sans);font-size:10px;font-weight:600;color:var(--muted)}
+.fr-bot{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .fr-bot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .feed-row.flash-in{animation:rowin .6s}
 @keyframes rowin{from{transform:translateY(-6px);opacity:0;background:var(--panel-2)}to{transform:none;opacity:1}}
@@ -365,7 +365,7 @@ body{
 /* ---- price chart (main feature) ---- */
 .chart-head{flex-wrap:wrap;gap:12px}
 .chart-controls{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.chart-legend{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--txt-2)}
+.chart-legend{display:flex;gap:14px;align-items:center;font-size:13px;color:var(--txt-2)}
 .lg{display:inline-flex;align-items:center;gap:6px}
 .lg i{width:14px;height:3px;border-radius:2px;display:inline-block;font-style:normal}
 .lg-aster i{background:var(--amber)}
@@ -376,7 +376,7 @@ body{
 .lg-sell i{color:var(--red)}
 .lg b{color:var(--txt);font-family:var(--mono);margin-left:2px}
 .zoom{display:flex;gap:2px;background:var(--bg-2);border:1px solid var(--line);border-radius:9px;padding:2px}
-.zoom-btn{background:none;border:none;color:var(--txt-2);font-size:12px;font-weight:600;padding:4px 12px;border-radius:7px;cursor:pointer;font-family:var(--mono)}
+.zoom-btn{background:none;border:none;color:var(--txt-2);font-size:13px;font-weight:600;padding:4px 12px;border-radius:7px;cursor:pointer;font-family:var(--mono)}
 .zoom-btn:hover{color:var(--txt)}
 .zoom-btn.on{background:var(--panel-2);color:var(--cyan);box-shadow:0 1px 2px rgba(0,0,0,.35)}
 #autoBtn{padding:4px 9px;font-size:13px;margin-left:2px;border-left:1px solid var(--line)}
@@ -397,32 +397,32 @@ body{
 .panels .card-head h2{font-size:12px}
 .panels .card-body{padding:13px 16px}
 .panels .cmd-line{display:none}            /* launch cmd is long; keep panels tight */
-.panels .k,.panels .meter label{font-size:10px;letter-spacing:.07em;color:var(--txt-2)}
+.panels .k,.panels .meter label{font-size:11px;letter-spacing:.07em;color:var(--txt-2)}
 .panels .proc{gap:6px}
 .panels .proc-state{font-size:17px}
 .panels .proc-meta{gap:16px;font-size:12px}
-.panels .host-line{margin-top:10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panels .host-line{margin-top:10px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .panels .meter-row{gap:18px;margin:14px 0 4px}
 .panels .meter b{font-size:14px}
 .panels .hedge-headline{margin-bottom:9px}
 .panels .hedge-headline b{font-size:20px}
 .panels .hedge-breakdown{gap:7px;margin-bottom:11px}
-.panels .hb-chip{padding:4px 9px;font-size:10.5px}
+.panels .hb-chip{padding:4px 9px;font-size:11.5px}
 .panels .lat-block{padding-top:9px}
-.panels .lat-label{font-size:11px;margin-bottom:7px}
+.panels .lat-label{font-size:12px;margin-bottom:7px}
 .panels .lat-scale{height:16px}
 .panels .econ-grid{grid-template-columns:repeat(4,1fr);gap:7px 16px;margin-bottom:0}
 .panels .econ-grid div{gap:3px}
 .panels .econ-grid b{font-size:15px}
 /* overall payoff ratio (avg win vs avg loss) below the econ grid — compact so the fixed-height
    panel card doesn't overflow into a scrollbar */
-.econ-wl{margin-top:6px;font-size:10.5px;color:var(--txt-2);display:flex;gap:15px;
+.econ-wl{margin-top:6px;font-size:11.5px;color:var(--txt-2);display:flex;gap:15px;
   flex-wrap:wrap;align-items:baseline}
-.econ-wl b{font-weight:700;font-size:11.5px}
+.econ-wl b{font-weight:700;font-size:12.5px}
 .panels>#cardEcon .card-body{padding:10px 16px 9px}   /* tighter so grid+payoff line fits, no scrollbar */
 .panels .tbl{width:100%}
-.panels .tbl td{padding:8px 7px;font-size:12.5px}
-.panels .tbl th{padding:6px 7px;font-size:10px}
+.panels .tbl td{padding:8px 7px;font-size:13.5px}
+.panels .tbl th{padding:6px 7px;font-size:11px}
 .panels .th-logo{height:11px}
 .panels .th-logo.logo-hl{height:10px}
 .panels #cardSpread .sd-bar{height:52px}
@@ -431,7 +431,7 @@ body{
 /* ---- spread decomposition (the "fairly big" quote build-up off the HL hedge) ---- */
 .sd-wrap{display:flex;flex-direction:column;justify-content:center;gap:11px;height:100%}
 .sd-wrap .empty{margin:auto;color:var(--muted)}
-.sd-ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;font-weight:600}
+.sd-ends{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-weight:600}
 .sd-ends .hl-end{color:var(--cyan)}
 .sd-ends .ask-end{color:var(--amber)}
 .sd-bar{display:flex;height:58px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
@@ -439,17 +439,17 @@ body{
   color:#0a0c10;border-right:1px solid rgba(0,0,0,.28)}
 .sd-seg:last-child{border-right:none}
 .sd-seg .sd-bps{font-family:var(--mono);font-size:15px;font-weight:800;line-height:1;display:flex;flex-direction:column;align-items:center}
-.sd-seg .sd-unit{font-size:8px;font-weight:700;opacity:.72;letter-spacing:.02em;margin-top:1px}
+.sd-seg .sd-unit{font-size:9px;font-weight:700;opacity:.72;letter-spacing:.02em;margin-top:1px}
 .sd-seg .sd-lbl{font-size:9px;font-weight:700;opacity:.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:96%}
 /* gradients scoped to bar SEGMENTS only — the legend reuses these classes but must NOT inherit a
    light background (that made its labels light-on-light / unreadable); it shows colour via its swatch */
 .sd-seg.sd-fee{background:linear-gradient(180deg,#ff8a98,#ff5d73)}
 .sd-seg.sd-buf{background:linear-gradient(180deg,#bcb0ff,#9a8cff)}
 .sd-seg.sd-profit{background:linear-gradient(180deg,#5fe9b3,#34e0a1)}
-.sd-foot{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--txt-2);flex-wrap:wrap}
+.sd-foot{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--txt-2);flex-wrap:wrap}
 .sd-foot b{font-family:var(--mono);color:var(--txt)}
 /* legend: names every bar component (incl. the thin ones whose label won't fit inside) */
-.sd-legend{display:flex;flex-wrap:wrap;gap:5px 13px;font-size:10.5px;color:var(--txt-2);line-height:1.3}
+.sd-legend{display:flex;flex-wrap:wrap;gap:5px 13px;font-size:11.5px;color:var(--txt-2);line-height:1.3}
 .sd-key{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .sd-key i{width:9px;height:9px;border-radius:2px;flex:none}
 .sd-key.sd-fee i{background:#ff5d73}
