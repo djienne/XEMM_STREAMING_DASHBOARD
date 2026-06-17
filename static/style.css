@@ -161,6 +161,9 @@ body{
 .card-head{flex:none;display:flex;align-items:center;justify-content:space-between;
   padding:9px 14px;border-bottom:1px solid var(--line)}
 .card-head h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--txt)}
+.card-head h2 .ch-sub{display:block;margin-top:2px;font-weight:600;letter-spacing:0;text-transform:none}
+.last-trade{color:var(--txt-2);white-space:nowrap}
+.last-trade.stale{color:var(--amber)}
 .card-body{padding:12px 14px}
 
 /* chart fills the space between hero and the panel grid */
@@ -322,6 +325,28 @@ body{
 .toast.win .t-pnl{color:var(--green)}.toast.loss .t-pnl{color:var(--red)}
 @keyframes toastin{from{transform:translateX(120%);opacity:0}to{transform:none;opacity:1}}
 @keyframes toastout{to{transform:translateX(120%);opacity:0}}
+
+/* ---- big centered win/loss trigger gif (pops on a completed round) ---- */
+.gif-trigger{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.gif-trigger .gt-card{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 18px 16px;
+  border-radius:22px;background:rgba(8,10,15,.74);backdrop-filter:blur(4px);border:1px solid var(--line-2)}
+.gif-trigger .gt-gif{height:min(46vh,440px);width:auto;max-width:48vw;border-radius:16px;object-fit:contain;background:#000;display:block}
+.gif-trigger.win  .gt-card{border-color:rgba(52,224,161,.6);box-shadow:0 0 120px -8px rgba(52,224,161,.55),0 30px 80px -24px rgba(0,0,0,.85)}
+.gif-trigger.loss .gt-card{border-color:rgba(255,93,115,.6);box-shadow:0 0 120px -8px rgba(255,93,115,.55),0 30px 80px -24px rgba(0,0,0,.85)}
+.gif-trigger.win  .gt-gif{box-shadow:0 0 0 3px rgba(52,224,161,.5),0 0 70px -4px rgba(52,224,161,.6)}
+.gif-trigger.loss .gt-gif{box-shadow:0 0 0 3px rgba(255,93,115,.5),0 0 70px -4px rgba(255,93,115,.6)}
+.gt-cap{display:flex;align-items:baseline;gap:14px;font-family:var(--mono);max-width:48vw;flex-wrap:wrap;justify-content:center}
+.gt-title{font-family:var(--sans);font-weight:800;font-size:20px;letter-spacing:.05em}
+.gif-trigger.win  .gt-title{color:var(--green)}
+.gif-trigger.loss .gt-title{color:var(--red)}
+.gt-pnl{font-weight:800;font-size:26px}
+.gif-trigger.win  .gt-pnl{color:var(--green)}
+.gif-trigger.loss .gt-pnl{color:var(--red)}
+.gt-sub{font-size:13px;color:var(--txt-2)}
+.gif-trigger.in  .gt-card{animation:gtin .45s cubic-bezier(.18,.9,.28,1.2)}
+.gif-trigger.out .gt-card{animation:gtout .5s forwards}
+@keyframes gtin{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.04)}100%{transform:scale(1);opacity:1}}
+@keyframes gtout{to{transform:scale(.92);opacity:0}}
 
 /* value change flash */
 .flash-up{animation:fup .7s}

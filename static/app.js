@@ -18,6 +18,9 @@ const ui = {
   rotateIdx: 0,          // auto-cycle position through [short, 1h, 4h]
   autoRotate: true,
   lastFillTime: null,    // ms of the most recent fill (drives the 5m fill-focus)
+  lastTradeTime: null,   // epoch ms of the most recent completed round (drives "time since last trade")
+  winGifIdx: 0,          // alternates the big win overlay between the win gifs
+  triggerTimer: null,    // dismiss timer for the centered win/loss gif overlay
 };
 
 /* escape exchange/remote-controlled strings before innerHTML (coin/symbol/reason/note) */
@@ -581,7 +584,8 @@ function renderFeed(derived) {
   tag.textContent = `${feed.length}`;
   cls(tag, "tag");
   const maxT = Math.max(0, ...feed.map(r => r.time || 0));
-  if (maxT) ui.lastFillTime = Math.max(ui.lastFillTime || 0, maxT);
+  if (maxT) { ui.lastFillTime = Math.max(ui.lastFillTime || 0, maxT); ui.lastTradeTime = maxT; }
+  tickLastTrade();
   list.innerHTML = feed.map(r => {
     const isNew = !ui.seenFeedKeys.has(r.key);
     const t = r.time ? new Date(r.time) : null;
@@ -598,6 +602,16 @@ function renderFeed(derived) {
     </div>`;
   }).join("");
   feed.forEach(r => ui.seenFeedKeys.add(r.key));
+}
+
+// "time since last trade" — ticks every second off the most recent completed round.
+const TRADE_QUIET_MS = 20 * 60000;   // highlight (amber) once the desk has been quiet this long
+function tickLastTrade() {
+  const el = $("lastTradeAgo"); if (!el) return;
+  if (!ui.lastTradeTime) { el.textContent = "last trade —"; el.classList.remove("stale"); return; }
+  const dt = Math.max(0, Date.now() - ui.lastTradeTime);
+  el.textContent = "last trade " + fmtElapsed(dt) + " ago";
+  el.classList.toggle("stale", dt >= TRADE_QUIET_MS);
 }
 
 function renderBanner(stats, health) {
@@ -625,7 +639,50 @@ function handleEvents(events) {
   if (ui.lastEventId === null) { ui.lastEventId = maxId; return; }   // seed: don't toast backlog
   const fresh = events.filter(e => e.id > ui.lastEventId).sort((a, b) => a.id - b.id);
   fresh.forEach(showToast);
-  if (fresh.length) { ui.lastEventId = maxId; focusFill(); }   // a fresh fill -> snap to the 5m view
+  if (fresh.length) {
+    ui.lastEventId = maxId;
+    focusFill();                       // a fresh fill -> snap to the 5m view
+    showTrigger(fresh[fresh.length - 1]);   // big centered gif for the most recent round
+  }
+}
+
+/* big celebratory / commiserating gif, centered, with a green/red glow.
+   win  -> alternates dicaprio.gif <-> macmahon.gif ;  loss -> gosling-dive.gif */
+const WIN_GIFS = ["dicaprio.gif", "macmahon.gif"];
+const LOSS_GIF = "gosling-dive.gif";
+
+// Warm the browser cache once so the overlay pops instantly and the gif plays from frame 0.
+// All local (served over loopback from /gifs), so this costs no external bandwidth.
+function preloadTriggerGifs() {
+  [LOSS_GIF, ...WIN_GIFS].forEach((name) => { const i = new Image(); i.src = `/gifs/${name}`; });
+}
+
+function showTrigger(ev) {
+  const wrap = $("gifTrigger");
+  if (!wrap) return;
+  const win = ev.kind === "win";
+  const file = win ? WIN_GIFS[ui.winGifIdx++ % WIN_GIFS.length] : LOSS_GIF;
+  const detail = `${esc(ev.side)} ${esc(ev.coin)} ${f.num(ev.qty, 4)} @ ${f.usd(ev.price, ev.price < 10 ? 4 : 3)}`
+    + (ev.latency_ms != null ? ` · ${ev.latency_ms}ms` : "");
+  // Recreate the <img> each time so the cached gif restarts its animation from the first frame.
+  wrap.innerHTML = `
+    <div class="gt-card">
+      <img class="gt-gif" src="/gifs/${file}" alt="">
+      <div class="gt-cap">
+        <span class="gt-title">${win ? "WINNING TRADE" : "LOSING TRADE"}</span>
+        <span class="gt-pnl">${f.money(ev.net, 4)}</span>
+        <span class="gt-sub">${detail}</span>
+      </div>
+    </div>`;
+  wrap.className = `gif-trigger ${win ? "win" : "loss"}`;
+  wrap.hidden = false;
+  void wrap.offsetWidth;               // force reflow so the pop-in animation restarts
+  wrap.classList.remove("out"); wrap.classList.add("in");
+  clearTimeout(ui.triggerTimer);
+  ui.triggerTimer = setTimeout(() => {
+    wrap.classList.remove("in"); wrap.classList.add("out");
+    setTimeout(() => { if (wrap.classList.contains("out")) { wrap.hidden = true; wrap.innerHTML = ""; } }, 500);
+  }, 6000);
 }
 
 function showToast(ev) {
@@ -924,3 +981,5 @@ async function pricePoll() {
 
 poll();
 pricePoll();
+preloadTriggerGifs();
+setInterval(tickLastTrade, 1000);   // keep "time since last trade" live between the 5s state polls

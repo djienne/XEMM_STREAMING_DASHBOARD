@@ -16,6 +16,9 @@
 <!-- toast stack -->
 <div id="toasts" class="toasts" aria-live="polite"></div>
 
+<!-- big centered win/loss gif overlay (pops on a newly-completed round) -->
+<div id="gifTrigger" class="gif-trigger" aria-hidden="true" hidden></div>
+
 <!-- breaker banner (fixed overlay so it never shifts the fixed layout) -->
 <div id="banner" class="banner" hidden></div>
 
@@ -199,7 +202,7 @@
   <aside class="rail">
     <section class="card rail-card" id="cardFeed">
       <div class="card-head">
-        <h2>trade history <span class="muted small">— Aster + HL</span></h2>
+        <h2>trade history<span class="ch-sub muted small">— Aster + HL · <span id="lastTradeAgo" class="last-trade" title="time since the last completed round">last trade —</span></span></h2>
         <span id="feedTag" class="tag">—</span>
       </div>
       <div id="todayBar" class="today-bar">
