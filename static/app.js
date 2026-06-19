@@ -205,13 +205,6 @@ function renderHero(st, live, health, stats, derived) {
   $("wrFill").style.width = wr == null ? "0%" : (wr * 100).toFixed(0) + "%";
   $("wrCount").textContent = derived.priced ? `${derived.wins}/${derived.priced} rounds` : "";
 
-  // delta
-  const dEl = $("deltaVal");
-  if (live.per_coin && live.per_coin.length) {
-    if (live.neutral) { dEl.textContent = "● NEUTRAL"; cls(dEl, "kpi-val", "num", "pos"); $("deltaFoot").textContent = `delta-neutral (<0.001) · worst ${f.usd(live.worst_net_usd ?? 0)}`; }
-    else { dEl.textContent = "⚠ " + f.usd(live.worst_net_usd ?? 0); cls(dEl, "kpi-val", "num", "neg"); $("deltaFoot").textContent = "NOT delta-neutral"; }
-  } else { dEl.textContent = "—"; $("deltaFoot").textContent = "—"; }
-
   // equity — full live cross-venue capital: HL accountValue + signed Aster USDC/USDF/USDT.
   // Aster can carry negative settlement rows, so collectors must not filter to positive balances. On a
   // delta-neutral book the marked equity wobbles with the cross-venue basis and the vs-baseline
