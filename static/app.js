@@ -140,6 +140,7 @@ function render(st) {
   guard("topbar", () => renderTopbar(st, live, health, stats));
   guard("apilat", () => renderApiLatency(st));
   guard("hero", () => renderHero(st, live, health, stats, derived));
+  guard("priceSpread", () => renderPriceSpread(st));
   guard("chart", () => renderChart(st));
   guard("health", () => renderHealth(health));
   guard("breaker", () => renderBreaker(live, health, cfg, derived));
@@ -246,6 +247,45 @@ function renderHero(st, live, health, stats, derived) {
   cEl.textContent = cagr == null ? "—" : fmtCagr(cagr);
   cls(cEl, "kpi-val", "num", cagr == null ? "" : f.sign(cagr));
   $("cagrFoot").textContent = cagr == null ? "—" : "compounded · illustrative";
+}
+
+function latestVenuePricePair(st) {
+  const prices = st.prices || {};
+  const scan = (rows) => {
+    for (let i = (rows || []).length - 1; i >= 0; i--) {
+      const p = rows[i] || {};
+      const aster = Number(p.aster), hl = Number(p.hl);
+      if (isFinite(aster) && isFinite(hl) && hl > 0) return { ...p, aster, hl };
+    }
+    return null;
+  };
+  return scan(prices.live) || scan(prices.hist);
+}
+
+function venueSpreadBps(pair) {
+  if (!pair) return null;
+  const aster = Number(pair.aster), hl = Number(pair.hl);
+  if (!isFinite(aster) || !isFinite(hl) || hl <= 0) return null;
+  return (aster - hl) / hl * 1e4;
+}
+
+function renderPriceSpread(st) {
+  const val = $("spreadVal"), foot = $("spreadFoot");
+  if (!val || !foot) return;
+  const pair = latestVenuePricePair(st);
+  const bps = venueSpreadBps(pair);
+  if (bps == null) {
+    val.textContent = "—";
+    cls(val, "kpi-val", "num", "flat");
+    foot.textContent = "waiting for both venues";
+    foot.title = "";
+    return;
+  }
+  const signVal = Math.abs(bps) < 0.05 ? 0 : bps;
+  setVal("spreadVal", f.bps(bps, 1), bps);
+  cls(val, "kpi-val", "num", f.sign(signVal));
+  foot.textContent = signVal > 0 ? "Aster above HL" : signVal < 0 ? "Aster below HL" : "flat";
+  foot.title = `Aster ${f.usd(pair.aster, 3)} · HL ${f.usd(pair.hl, 3)}${pair.t ? " · " + utcHMS(pair.t) + " UTC" : ""}`;
 }
 
 function renderHealth(health) {
@@ -749,7 +789,7 @@ function renderChart(st) {
   const last = pts[pts.length - 1];
   $("lgAster").textContent = last.aster != null ? f.usd(last.aster, 3) : "—";
   $("lgHl").textContent = last.hl != null ? f.usd(last.hl, 3) : "—";
-  const lb = (last.aster != null && last.hl != null) ? (last.aster - last.hl) / last.hl * 1e4 : null;
+  const lb = venueSpreadBps(last);
   $("lgBasis").textContent = lb != null ? f.bps(lb, 1) : "—";
 }
 
@@ -972,7 +1012,11 @@ async function fetchPrices() {
   if (!ui.lastState) return;
   try {
     const r = await fetch(`/api/prices?minutes=${ui.chartWindow || 60}`, { cache: "no-store" });
-    if (r.ok) { ui.lastState.prices = await r.json(); renderChart(ui.lastState); }
+    if (r.ok) {
+      ui.lastState.prices = await r.json();
+      renderPriceSpread(ui.lastState);
+      renderChart(ui.lastState);
+    }
   } catch (e) { /* ignore — next poll recovers */ }
 }
 async function pricePoll() {
