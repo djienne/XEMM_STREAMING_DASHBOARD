@@ -16,6 +16,9 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
+# Runtime mountpoint for the trading repo bits that trade_stats.py reads.
+RUN mkdir -p /trading/scripts
+
 # Install deps first for layer caching.
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt

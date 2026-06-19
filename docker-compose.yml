@@ -35,10 +35,16 @@ services:
       - ./static:/app/static:ro
       - ./gifs:/app/gifs:ro
 
-      # The trading repo (scripts/trade_stats.py + pnl.py, aster.env, hyperliquid.env,
-      # config-live-hype.toml). READ-ONLY: the container can read creds + reuse the exact signing
-      # code, but can never write to or destroy anything in the live trading repo.
-      - ..:/trading:ro
+      # The trading repo pieces the dashboard needs. Each source is mounted read-only, while the
+      # /trading mountpoint itself stays writable so Docker can place dashboard-local env files at
+      # the exact paths trade_stats.py resolves from ROOT.
+      - ../scripts:/trading/scripts:ro
+      - ../config-live-hype.toml:/trading/config-live-hype.toml:ro
+
+      # Local dashboard-side copies of the exchange env files. trade_stats.py resolves these from
+      # the trading repo root, so mount them at the exact paths it reads inside /trading.
+      - ./aster.env:/trading/aster.env:ro
+      - ./hyperliquid.env:/trading/hyperliquid.env:ro
 
       # The VPS SSH key for the read-only health/latency probes. Override the host path in a local
       # .env (XEMM_SSH_KEY=...); default expects a copy at ./secrets/lighter.pem. Mounted read-only;
