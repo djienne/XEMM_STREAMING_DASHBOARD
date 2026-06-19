@@ -53,28 +53,21 @@ def _f(x) -> float:
         return 0.0
 
 
-# --- Aster equity: INCLUDE the USDT balance --------------------------------------------------
-# scripts/trade_stats.py:aster_equity() sums only USDC/USDF positive balances and drops USDT — which
-# UNDERCOUNTS. The live Rust circuit breaker (src/livebot/reconcile.rs) sums ALL positive balances
-# incl. USDT, and Aster pays closed profits in USDT, so the dashboard mirrors the bot and reports
-# the FULL spendable Aster balance — USDC + USDF + USDT (+ open-position uPnL) — so the headline equity and
-# capital reflect the whole account (operator decision 2026-06-17; the ~$1 USDT was otherwise
-# invisible, leaving total equity ~$1 light). This override lives in collectors (local to
-# XEMM_DASHBOARD, never synced from the VPS), so it survives sync_from_vps.py; pnl.py on the VPS
-# still uses USDC/USDF unless the same asset is added to aster_equity() there too.
+# --- Aster equity: signed multi-collateral balance -------------------------------------------
+# Aster is multi-collateral cross-margin and can settle fees/losses into a negative USDT row while
+# USDC remains positive. Filtering to positive rows overstates account equity. Mirror the trading
+# repo's trade_stats.aster_equity(): signed USDC + USDF + USDT, plus positionRisk uPnL.
 _ASTER_EQUITY_ASSETS = ("USDC", "USDF", "USDT")
 
 
 def aster_equity_full(ts, roles) -> float:
-    """Aster equity INCLUDING USDT: positive USDC/USDF/USDT balances + open-position uPnL.
-    Mirrors trade_stats.aster_equity() but keeps USDT (see _ASTER_EQUITY_ASSETS)."""
+    """Aster equity: signed USDC/USDF/USDT collateral + open-position uPnL."""
     bal = Decimal(0)
     for row in ts.aster_get("/fapi/v3/balance", {}, roles):
-        if row.get("asset") not in _ASTER_EQUITY_ASSETS:
+        if str(row.get("asset", "")).upper() not in _ASTER_EQUITY_ASSETS:
             continue
         b = Decimal(str(row.get("balance", "0")))
-        if b > 0:
-            bal += b
+        bal += b
     upnl = Decimal(0)
     for row in ts.aster_get("/fapi/v3/positionRisk", {}, roles):
         upnl += Decimal(str(row.get("unRealizedProfit", "0")))
@@ -109,7 +102,7 @@ def fast_snapshot(root: str) -> dict:
     h_pos, h_eq = {}, None
     try:
         a_pos = ts.aster_positions(roles)              # {symbol: (Decimal amt, Decimal upnl)}
-        a_eq = aster_equity_full(ts, roles)            # USDC+USDF+USDT (+uPnL); see aster_equity_full
+        a_eq = aster_equity_full(ts, roles)            # signed USDC+USDF+USDT (+uPnL)
     except (Exception, SystemExit) as e:  # SystemExit: trade_stats._req exits on request failure
         out["errors"].append(f"aster positions/equity: {e!r}")
     try:
@@ -232,9 +225,9 @@ def heavy_stats(root: str, since: str, until: str | None = None, timeout: float 
     cmd = [sys.executable, script, "--since", since, "--json", jpath]
     if until:
         cmd += ["--until", until]
-    # Pin the capital base to the FULL live equity incl. the Aster USDT balance, so return.capital
+    # Pin the capital base to the signed live equity incl. the Aster USDT balance, so return.capital
     # (the dashboard's headline equity + the return%/CAGR/today-P&L% denominator) reflects the whole
-    # account. Without this, trade_stats re-derives its own USDC/USDF-only equity and drops USDT.
+    # account and matches the fast headline calculation for this refresh.
     try:
         ts = load_trade_stats(root)
         roles = ts.aster_roles()

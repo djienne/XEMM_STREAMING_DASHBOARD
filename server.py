@@ -68,6 +68,17 @@ def local_pnl_fallback(root: str) -> str | None:
         return None
 
 
+def configured_since(cfg: dict) -> dict | None:
+    override = str(cfg.get("since_override_utc") or "").strip()
+    if not override:
+        return None
+    return {
+        "value": override,
+        "source": "config",
+        "detail": "since_override_utc in config.json",
+    }
+
+
 def parse_live_config(root: str) -> dict:
     """Best-effort read of the live edge/quote/breaker settings from config-live-hype.toml (for display)."""
     path = os.path.join(root, "config-live-hype.toml")
@@ -223,17 +234,22 @@ def live_loop(cfg, state: State):
 
 def health_loop(cfg, state: State):
     period = cfg["refresh"]["health_s"]
+    since_override = configured_since(cfg)
     while True:
         try:
             h = vps_health.probe(cfg)
             with state.lock:
                 state.health = h
-                if h.get("reachable") and h.get("since", {}).get("value"):
+                if since_override:
+                    state.since = since_override
+                elif h.get("reachable") and h.get("since", {}).get("value"):
                     state.since = h["since"]
         except Exception as e:  # noqa: BLE001
             with state.lock:
                 state.health = {"reachable": False, "error": repr(e),
                                 "checked_at": vps_health._now_iso()}
+                if since_override:
+                    state.since = since_override
         time.sleep(period)
 
 
@@ -457,6 +473,7 @@ def _downsample(ticks, max_points):
 def stats_loop(cfg, state: State):
     root = cfg["_root_abs"]
     period = cfg["refresh"]["stats_s"]
+    since_override = configured_since(cfg)
     fallback = local_pnl_fallback(root)        # mirrors local pnl.py; no invented third cutoff
     ch = cfg.get("chart", {})
     db_path = ch.get("tick_db", "data/prices.sqlite")
@@ -475,7 +492,7 @@ def stats_loop(cfg, state: State):
     while True:
         # clear BEFORE the work so a fill detected mid-run survives to trigger the next pass
         state.heavy_signal.clear()
-        since = since_value() or fallback
+        since = (since_override or {}).get("value") or since_value() or fallback
         if since:
             try:
                 d = collectors.heavy_stats(root, since)
@@ -643,6 +660,9 @@ def make_handler(cfg, state: State):
 def main():
     cfg = load_config()
     state = State()
+    since_override = configured_since(cfg)
+    if since_override:
+        state.since = since_override
     try:
         state.live_config = parse_live_config(cfg["_root_abs"])
     except Exception:  # noqa: BLE001

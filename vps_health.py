@@ -149,10 +149,13 @@ def _parse(out: str, cfg: dict) -> dict:
         vals = rows.get(key)
         return vals[0] if vals else default
 
+    proc_name = cfg.get("vps", {}).get("process_name", "xemm_eval")
+    bot_procs = [p for p in procs if _is_process_cmd(p["cmd"], proc_name)]
+
     # Pick the live process: prefer one whose command contains "--mode live".
-    live = next((p for p in procs if "--mode live" in p["cmd"]), None)
-    if live is None and procs:
-        live = max(procs, key=lambda p: p["uptime_s"])  # fall back to the longest-running match
+    live = next((p for p in bot_procs if "--mode live" in p["cmd"]), None)
+    if live is None and bot_procs:
+        live = max(bot_procs, key=lambda p: p["uptime_s"])  # fall back to the longest-running match
 
     now_epoch = _int(g("NOW_EPOCH")) or None
     hb_epoch = _int(g("HEARTBEAT_EPOCH"))
@@ -178,7 +181,7 @@ def _parse(out: str, cfg: dict) -> dict:
         "now_epoch": now_epoch,
         "process": {
             "running": live is not None,
-            "count": len(procs),
+            "count": len(bot_procs),
             **(live or {}),
         },
         "host": {
@@ -202,6 +205,16 @@ def _parse(out: str, cfg: dict) -> dict:
         "since": {"value": since, "source": since_source, "detail": since_detail},
     }
     return health
+
+
+def _is_process_cmd(cmd: str, proc_name: str) -> bool:
+    """True only when the command's executable is the bot binary.
+
+    `pgrep -f xemm_eval` also matches compiler commands such as
+    `rustc --crate-name xemm_eval`; those must not produce a false green bot status.
+    """
+    exe = (cmd or "").strip().split(" ", 1)[0]
+    return os.path.basename(exe) in {proc_name, f"{proc_name}.exe"}
 
 
 def _resolve_since_from_rows(g):

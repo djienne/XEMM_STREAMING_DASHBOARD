@@ -211,9 +211,8 @@ function renderHero(st, live, health, stats, derived) {
     else { dEl.textContent = "⚠ " + f.usd(live.worst_net_usd ?? 0); cls(dEl, "kpi-val", "num", "neg"); $("deltaFoot").textContent = "NOT delta-neutral"; }
   } else { dEl.textContent = "—"; $("deltaFoot").textContent = "—"; }
 
-  // equity — full live cross-venue capital: HL accountValue + Aster USDC/USDF/USDT. collectors
-  // includes the Aster USDT balance (trade_stats/pnl.py drop it): Aster pays closed profits in
-  // USDT, so excluding it would HIDE realized gains as USDC slowly converts to USDT. On a
+  // equity — full live cross-venue capital: HL accountValue + signed Aster USDC/USDF/USDT.
+  // Aster can carry negative settlement rows, so collectors must not filter to positive balances. On a
   // delta-neutral book the marked equity wobbles with the cross-venue basis and the vs-baseline
   // delta is misleading, so we show equity but defer to the per-round P&L and hide vs-baseline.
   const eq = (stats.return && stats.return.capital) ?? (live.equity && live.equity.total);
@@ -340,7 +339,7 @@ function renderPositions(live) {
 // to inventory — capital is effectively fully deployed. This mirrors the live bot's real binding
 // constraint: the increasing side is suppressed (margin-reject suppression, or the position cap)
 // when, on the BINDING leg, headroom against the EFFECTIVE cap = min(config soft cap, available
-// margin ≈ leg equity) drops below one clip. The $200 config cap never binds at ~$124 equity, so
+// margin ≈ leg equity) drops below one clip. The $200 config cap usually does not bind at current equity, so
 // margin is the true ceiling. Below capacity, one-sidedness is edge/basis-driven — we assert nothing.
 function detectOneSided(live, cfg) {
   const oo = live.open_orders || [], pc = live.per_coin || [];
