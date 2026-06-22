@@ -87,7 +87,12 @@ function fmtElapsed(ms) {   // nicely format a growing span: seconds -> minutes 
   if (h >= 1) { const m = Math.floor((s % 3600) / 60); return `${h}h${m ? " " + m + "m" : ""}`; }
   const m = Math.floor(s / 60); return m >= 1 ? `${m}m` : `${Math.floor(s)}s`;
 }
+const UTC_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function utcHMS(d) { return (d instanceof Date ? d : new Date(d)).toISOString().slice(11, 19); }  // HH:MM:SS UTC
+function utcDMHMS(d) {
+  const dt = d instanceof Date ? d : new Date(d);
+  return `${String(dt.getUTCDate()).padStart(2, "0")} ${UTC_MONTHS[dt.getUTCMonth()]} ${utcHMS(dt)}`;
+}
 function utcHM(d) { return (d instanceof Date ? d : new Date(d)).toISOString().slice(11, 16); }   // HH:MM UTC
 function sinceMs(s) {
   if (!s) return null;
@@ -623,6 +628,8 @@ function renderFeed(derived) {
   list.innerHTML = feed.map(r => {
     const isNew = !ui.seenFeedKeys.has(r.key);
     const t = r.time ? new Date(r.time) : null;
+    const meta = [r.latency_ms != null ? r.latency_ms + "ms" : "", t ? utcDMHMS(t) : ""]
+      .filter(Boolean).join(" · ");
     return `<div class="feed-row ${r.win ? 'win' : 'loss'} ${isNew ? 'flash-in' : ''}">
       <div class="fr-top">
         <span class="fr-res">${r.win ? "WIN" : "LOSS"}</span>
@@ -630,8 +637,8 @@ function renderFeed(derived) {
         <span class="fr-pnl ${f.sign(r.net)}"><span class="fr-net">net</span> ${f.money(r.net, 4)}</span>
       </div>
       <div class="fr-bot">
-        <span>${f.num(r.qty, 4)} @ ${f.usd(r.price, r.price < 10 ? 4 : 3)}${r.basis_bps != null ? " · " + f.bps(r.basis_bps, 1) : ""}</span>
-        <span>${r.latency_ms != null ? r.latency_ms + "ms" : ""}${t ? " · " + utcHMS(t) : ""}</span>
+        <span class="fr-detail">${f.num(r.qty, 4)} @ ${f.usd(r.price, r.price < 10 ? 4 : 3)}${r.basis_bps != null ? " · " + f.bps(r.basis_bps, 1) : ""}</span>
+        <span class="fr-time">${meta}</span>
       </div>
     </div>`;
   }).join("");

@@ -301,8 +301,9 @@ body{
 .fr-pair{font-family:var(--sans);font-weight:700;font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fr-pnl{font-family:var(--mono);font-weight:800;font-size:14px;flex:none}
 .fr-net{font-family:var(--sans);font-size:10px;font-weight:600;color:var(--muted)}
-.fr-bot{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.fr-bot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr-bot{display:grid;grid-template-columns:1fr;gap:2px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.fr-detail{min-width:0;white-space:nowrap}
+.fr-time{white-space:nowrap;text-align:right}
 .feed-row.flash-in{animation:rowin .6s}
 @keyframes rowin{from{transform:translateY(-6px);opacity:0;background:var(--panel-2)}to{transform:none;opacity:1}}
 
